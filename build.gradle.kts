@@ -4,14 +4,22 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath(kotlin("gradle-plugin", version = "1.6.10"))
-        classpath("com.android.tools.build:gradle:7.0.4")
+        classpath(kotlin("gradle-plugin", version = Versions.Kotlin.lang))
+        classpath("com.android.tools.build:gradle:${Versions.agp}")
     }
 }
 
+group = Package.group
+version = Package.versionName
+
 allprojects {
-    repositories {
-        google()
-        mavenCentral()
+    configRepository()
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = Versions.Java.jvmTarget
+            freeCompilerArgs = listOf(
+                "-opt-in=kotlin.RequiresOptIn",
+            )
+        }
     }
 }
