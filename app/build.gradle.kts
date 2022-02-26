@@ -2,7 +2,6 @@ plugins {
     id("com.android.application")
     kotlin("android")
     id("org.jetbrains.compose") version Versions.compose_jb
-    id("com.google.devtools.ksp") version Versions.ksp
 }
 
 dependencies {
@@ -11,9 +10,6 @@ dependencies {
     implementation(projects.wallet)
     implementation(projects.labs)
     implementation(projects.setting)
-
-    implementation(projects.compiler.kroute.annotations)
-    ksp(projects.compiler.kroute)
 }
 
 android {
@@ -23,5 +19,4 @@ android {
             isMinifyEnabled = false
         }
     }
-    sourceSets["debug"].java.srcDir("build/generated/ksp/debug/kotlin")
 }
