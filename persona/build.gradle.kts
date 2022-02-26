@@ -1,21 +1,22 @@
 plugins {
     kotlin("multiplatform")
     id("com.android.library")
+    id("org.jetbrains.compose") version Versions.compose_jb
+    id("com.google.devtools.ksp") version Versions.ksp
 }
-
-group = Package.group
-version = Package.versionName
 
 kotlin {
     android()
     sourceSets {
-        val androidMain by getting {
+        val commonMain by getting {
             dependencies {
+                implementation(projects.compiler.kroute.annotations)
+                kspAndroid(projects.compiler.kroute)
             }
         }
-        val androidTest by getting {
+        val androidMain by getting {
             dependencies {
-                implementation("junit:junit:4.13.2")
+                implementation(projects.common)
             }
         }
     }
@@ -23,5 +24,4 @@ kotlin {
 
 android {
     setupLibrary()
-    withCompose()
 }

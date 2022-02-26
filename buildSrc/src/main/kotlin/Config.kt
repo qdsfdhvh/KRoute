@@ -1,17 +1,5 @@
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.maven
-import org.gradle.kotlin.dsl.repositories
-
-fun Project.configRepository() {
-    repositories {
-        google()
-        mavenCentral()
-        maven("https://jitpack.io")
-        maven("https://maven.mozilla.org/maven2/")
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
-    }
-}
 
 fun com.android.build.gradle.internal.dsl.BaseAppModuleExtension.setupApplication() {
     compileSdk = Versions.Android.compile
@@ -34,21 +22,15 @@ fun com.android.build.api.dsl.LibraryExtension.setupLibrary() {
     defaultConfig {
         minSdk = Versions.Android.min
         targetSdk = Versions.Android.target
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        // consumerProguardFiles("consumer-rules.pro")
     }
     compileOptions {
         sourceCompatibility = Versions.Java.java
         targetCompatibility = Versions.Java.java
     }
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
+    sourceSets["debug"].java.srcDir("build/generated/ksp/androidDebug/kotlin")
 }
 
-fun com.android.build.gradle.LibraryExtension.withCompose() {
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = Versions.compose_jb
-    }
+fun Project.kspAndroid(dependencyNotation: Any) {
+    project.dependencies.add("kspAndroid", dependencyNotation)
 }

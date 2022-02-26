@@ -1,2 +1,2 @@
-moe.tlaster.kroute.processor.RouteProcessorProvider
-moe.tlaster.kroute.processor.RouteGraphProcessorProvider
+com.dimension.maskbook.common.routeProcessor.RouteProcessorProvider
+com.dimension.maskbook.common.routeProcessor.RouteGraphProcessorProvider

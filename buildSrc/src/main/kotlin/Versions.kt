@@ -11,7 +11,6 @@ object Versions {
     object Kotlin {
         const val lang = "1.6.10"
         const val coroutines = "1.6.0"
-        const val serialization = "1.3.2"
     }
 
     object Java {
@@ -20,11 +19,9 @@ object Versions {
     }
 
     const val ksp = "${Kotlin.lang}-1.0.2"
-    const val agp = "7.0.4"
+    const val agp = "7.1.0"
+    const val kotlinpoet = "1.10.2"
     const val compose_jb = "1.1.0-alpha02"
     const val accompanist = "0.22.1-rc"
     const val navigation = "2.4.0"
-    const val lifecycle = "2.4.0"
-    const val koin = "3.1.4"
-    const val room = "2.4.1"
 }

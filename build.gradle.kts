@@ -1,19 +1,10 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath(kotlin("gradle-plugin", version = Versions.Kotlin.lang))
-        classpath("com.android.tools.build:gradle:${Versions.agp}")
-    }
+plugins {
+    id("com.android.application").apply(false)
+    id("com.android.library").apply(false)
+    kotlin("android").apply(false)
 }
 
-group = Package.group
-version = Package.versionName
-
 allprojects {
-    configRepository()
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions {
             jvmTarget = Versions.Java.jvmTarget
