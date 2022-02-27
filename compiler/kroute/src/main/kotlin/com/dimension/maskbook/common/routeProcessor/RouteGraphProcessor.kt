@@ -21,6 +21,7 @@
 package com.dimension.maskbook.common.routeProcessor
 
 import com.dimension.maskbook.common.routeProcessor.annotations.Back
+import com.dimension.maskbook.common.routeProcessor.annotations.GeneratedFunction
 import com.dimension.maskbook.common.routeProcessor.annotations.NavGraphDestination
 import com.dimension.maskbook.common.routeProcessor.annotations.Navigate
 import com.dimension.maskbook.common.routeProcessor.annotations.Path
@@ -39,6 +40,7 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
 import com.squareup.kotlinpoet.buildCodeBlock
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.toClassName
@@ -47,7 +49,6 @@ import com.squareup.kotlinpoet.ksp.writeTo
 import com.squareup.kotlinpoet.withIndent
 
 private val navControllerType = ClassName("androidx.navigation", "NavController")
-private const val navControllerName = "controller"
 
 private const val argumentsNulNullFormat = "val %N = it.arguments!!.get(%S) as %T"
 private const val argumentsNullableFormat = "val %N = it.arguments?.get(%S) as? %T"
@@ -58,45 +59,55 @@ internal class RouteGraphProcessor(
 ) : SymbolProcessor {
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val symbols = resolver
-            .getSymbolsWithAnnotation(
-                NavGraphDestination::class.qualifiedName
-                    ?: throw CloneNotSupportedException("Can not get qualifiedName for RouteGraphDestination")
-            ).filterIsInstance<KSFunctionDeclaration>().toList()
-        val ret = symbols.filter {
-            try {
-                it.getAnnotationsByType(NavGraphDestination::class).first().route
-                false
-            } catch (e: Throwable) {
+            .getSymbolsWithAnnotation(requireNotNull(NavGraphDestination::class.qualifiedName))
+            .filterIsInstance<KSFunctionDeclaration>()
+
+        val generatedFunctionSymbols = resolver
+            .getSymbolsWithAnnotation(requireNotNull(GeneratedFunction::class.qualifiedName))
+            .filterIsInstance<KSFunctionDeclaration>()
+
+        fun checkValidRoute(symbol: KSFunctionDeclaration): Boolean {
+            return try {
+                symbol.getAnnotationsByType(NavGraphDestination::class).first().route
                 true
+            } catch (e: Throwable) {
+                false
             }
         }
 
-        val actualSymbols = symbols - ret.toSet()
-        actualSymbols.groupBy {
-            it.getAnnotationsByType(NavGraphDestination::class).first().generatedFunctionName
-        }.forEach { (name, items) ->
-            generateRoute(items, name)
+        val ret = symbols.filterNot { checkValidRoute(it) }
+        if (!ret.none()) {
+            return (ret + generatedFunctionSymbols).toList()
         }
-        return ret
+
+        val actualSymbols = symbols - ret.toSet()
+        generatedFunctionSymbols.firstOrNull()?.let { generatedFunction ->
+            generateRoute(actualSymbols.toList(), generatedFunction)
+        }
+        return ret.toList()
     }
 
-    private fun generateRoute(data: List<KSFunctionDeclaration>, generatedFunctionName: String) {
-        if (data.isEmpty()) {
-            return
-        }
+    private fun generateRoute(data: List<KSFunctionDeclaration>, generatedFunction: KSFunctionDeclaration) {
         val dependencies = Dependencies(
             true,
             *(data.mapNotNull { it.containingFile }).toTypedArray()
         )
-        val packageName = data.first().packageName
+
+        val navControllerName = generatedFunction.parameters.find {
+            it.type.toTypeName() == navControllerType
+        }?.name?.getShortName()
+        requireNotNull(navControllerName) { "not find navController in parameters" }
+
+        val packageName = generatedFunction.packageName
         FileSpec.builder(packageName.asString(), "RouteGraph")
             .addImport("androidx.navigation", "NavType")
             .addImport("androidx.navigation", "navDeepLink")
             .addImport("androidx.navigation", "navArgument")
             .also { fileBuilder ->
                 fileBuilder.addFunction(
-                    FunSpec.builder(generatedFunctionName)
-                        .receiver(ClassName("androidx.navigation", "NavGraphBuilder"))
+                    FunSpec.builder(generatedFunction.simpleName.getShortName())
+                        .addModifiers(KModifier.ACTUAL)
+                        .receiver(requireNotNull(generatedFunction.extensionReceiver?.toTypeName()))
                         .addParameter(
                             navControllerName,
                             navControllerType,
@@ -104,13 +115,14 @@ internal class RouteGraphProcessor(
                         .also { builder ->
                             data.forEach { ksFunctionDeclaration ->
                                 if (packageName != ksFunctionDeclaration.packageName) {
-                                    fileBuilder.addImport(ksFunctionDeclaration.packageName.asString(), ksFunctionDeclaration.simpleName.asString())
-                                }
-                                val annotation =
-                                    ksFunctionDeclaration.getAnnotationsByType(
-                                        NavGraphDestination::class
+                                    fileBuilder.addImport(
+                                        ksFunctionDeclaration.packageName.asString(),
+                                        ksFunctionDeclaration.simpleName.asString()
                                     )
-                                        .first()
+                                }
+                                val annotation = ksFunctionDeclaration
+                                    .getAnnotationsByType(NavGraphDestination::class)
+                                    .first()
                                 fileBuilder.addImport(
                                     annotation.packageName,
                                     annotation.functionName

@@ -29,12 +29,15 @@ annotation class Route(
 
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.FUNCTION)
+annotation class GeneratedFunction
+
+@Retention(AnnotationRetention.SOURCE)
+@Target(AnnotationTarget.FUNCTION)
 annotation class NavGraphDestination(
     val route: String,
     val deepLinks: Array<String> = [],
     val packageName: String = "androidx.navigation.compose",
     val functionName: String = "composable",
-    val generatedFunctionName: String = "generatedRoute",
 )
 
 @Retention(AnnotationRetention.SOURCE)
