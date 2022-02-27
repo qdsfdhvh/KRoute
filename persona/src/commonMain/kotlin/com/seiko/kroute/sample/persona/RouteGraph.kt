@@ -5,6 +5,6 @@ import androidx.navigation.NavGraphBuilder
 import com.dimension.maskbook.common.routeProcessor.annotations.GeneratedFunction
 
 @GeneratedFunction
-expect fun NavGraphBuilder.generatedLabsRoute(
+expect fun NavGraphBuilder.generatedPersonaRoute(
     navController: NavController
 )

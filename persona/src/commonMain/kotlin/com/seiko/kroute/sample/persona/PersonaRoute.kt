@@ -6,4 +6,5 @@ import com.dimension.maskbook.common.routeProcessor.annotations.Route
 @Route
 expect object PersonaRoute {
     const val Tab: String
+    const val Dialog: String
 }

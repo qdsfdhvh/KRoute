@@ -80,11 +80,10 @@ internal class RouteGraphProcessor(
             return (symbols + generatedFunctionSymbols).toList()
         }
 
-        val actualSymbols = symbols.filter { it.validate() }
         generatedFunctionSymbols.forEach { generatedFunction ->
-            generateRoute(actualSymbols.toList(), generatedFunction)
+            generateRoute(symbols.toList(), generatedFunction)
         }
-        return symbols.filter { !it.validate() }.toList()
+        return symbols.toList()
     }
 
     private fun generateRoute(data: List<KSFunctionDeclaration>, generatedFunction: KSFunctionDeclaration) {

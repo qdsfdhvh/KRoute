@@ -10,6 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.seiko.kroute.common.AppRoute
 import com.seiko.kroute.sample.labs.generatedLabsRoute
+import com.seiko.kroute.sample.persona.generatedPersonaRoute
 import com.seiko.kroute.sample.ui.HomeScene
 
 class MainActivity : ComponentActivity() {
@@ -29,5 +30,6 @@ fun Route() {
     NavHost(navController, startDestination = AppRoute.Home) {
         composable(AppRoute.Home) { HomeScene(navController) }
         generatedLabsRoute(navController)
+        generatedPersonaRoute(navController)
     }
 }

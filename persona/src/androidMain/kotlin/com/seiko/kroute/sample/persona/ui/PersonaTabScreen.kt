@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.seiko.kroute.common.DeepLinks
+import com.seiko.kroute.sample.persona.PersonaRoute
 
 @Composable
 fun PersonaTabScreen(
@@ -37,6 +38,14 @@ fun PersonaTabScreen(
             verticalArrangement = Arrangement.Center,
         ) {
             Text(text = "Persona Tab")
+            Spacer(Modifier.height(10.dp))
+            Button(
+                onClick = {
+                    navController.navigate(PersonaRoute.Dialog)
+                }
+            ) {
+                Text("Open Dialog")
+            }
             Spacer(Modifier.height(10.dp))
             Button(
                 onClick = {
