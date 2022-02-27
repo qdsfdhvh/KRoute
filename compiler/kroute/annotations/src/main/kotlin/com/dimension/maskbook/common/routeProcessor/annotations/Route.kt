@@ -41,12 +41,14 @@ annotation class NavGraphDestination(
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class Path(
     val name: String = "",
+    val nullable: Boolean = false,
 )
 
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.VALUE_PARAMETER)
 annotation class Query(
     val name: String = "",
+    val nullable: Boolean = true,
 )
 
 @Retention(AnnotationRetention.SOURCE)
