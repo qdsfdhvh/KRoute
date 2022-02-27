@@ -37,6 +37,7 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
@@ -75,16 +76,15 @@ internal class RouteGraphProcessor(
             }
         }
 
-        val ret = symbols.filterNot { checkValidRoute(it) }
-        if (!ret.none()) {
-            return (ret + generatedFunctionSymbols).toList()
+        if (symbols.any { !checkValidRoute(it) }) {
+            return (symbols + generatedFunctionSymbols).toList()
         }
 
-        val actualSymbols = symbols - ret.toSet()
-        generatedFunctionSymbols.firstOrNull()?.let { generatedFunction ->
+        val actualSymbols = symbols.filter { it.validate() }
+        generatedFunctionSymbols.forEach { generatedFunction ->
             generateRoute(actualSymbols.toList(), generatedFunction)
         }
-        return ret.toList()
+        return symbols.filter { !it.validate() }.toList()
     }
 
     private fun generateRoute(data: List<KSFunctionDeclaration>, generatedFunction: KSFunctionDeclaration) {
