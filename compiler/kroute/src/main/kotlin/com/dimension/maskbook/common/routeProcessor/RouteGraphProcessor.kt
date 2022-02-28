@@ -23,19 +23,16 @@ package com.dimension.maskbook.common.routeProcessor
 import com.dimension.maskbook.common.routeProcessor.annotations.Back
 import com.dimension.maskbook.common.routeProcessor.annotations.GeneratedFunction
 import com.dimension.maskbook.common.routeProcessor.annotations.NavGraphDestination
-import com.dimension.maskbook.common.routeProcessor.annotations.Navigate
 import com.dimension.maskbook.common.routeProcessor.annotations.Path
 import com.dimension.maskbook.common.routeProcessor.annotations.Query
 import com.google.devtools.ksp.KspExperimental
 import com.google.devtools.ksp.getAnnotationsByType
-import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.isAnnotationPresent
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
-import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.ClassName
@@ -238,24 +235,6 @@ internal class RouteGraphProcessor(
                                                             "%N = { %N.navigateUp() },",
                                                             it.name?.asString() ?: "",
                                                             navControllerName
-                                                        )
-                                                    }
-                                                    it.isAnnotationPresent(Navigate::class) -> {
-                                                        val target = it.getAnnotationsByType(Navigate::class).first().target
-                                                        val type = it.type.resolve()
-                                                        require(type.isFunctionType)
-                                                        val declaration = type.declaration as KSClassDeclaration
-                                                        val parameters = declaration.getDeclaredFunctions().first().parameters
-                                                        val parameter = if (parameters.any()) {
-                                                            "\\{(\\w+)}".toRegex().findAll(target).map { it.groups[1]?.value }.joinToString(",") + " ->"
-                                                        } else {
-                                                            ""
-                                                        }
-                                                        addStatement(
-                                                            "%N = { $parameter %N.navigate(%P) },",
-                                                            it.name?.asString() ?: "",
-                                                            navControllerName,
-                                                            target.replace("{", "\${")
                                                         )
                                                     }
                                                 }
