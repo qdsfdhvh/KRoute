@@ -10,13 +10,13 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation(projects.common)
                 implementation(projects.compiler.kroute.annotations)
                 kspAndroid(projects.compiler.kroute)
             }
         }
         val androidMain by getting {
             dependencies {
-                implementation(projects.common)
             }
         }
     }

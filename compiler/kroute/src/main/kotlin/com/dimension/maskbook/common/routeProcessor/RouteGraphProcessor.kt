@@ -42,6 +42,7 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.buildCodeBlock
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.toClassName
@@ -50,6 +51,7 @@ import com.squareup.kotlinpoet.ksp.writeTo
 import com.squareup.kotlinpoet.withIndent
 
 private val navControllerType = ClassName("androidx.navigation", "NavController")
+private val commonNavControllerType = ClassName("com.seiko.kroute.common.route", "NavController")
 
 private const val argumentsNulNullFormat = "val %N = it.arguments!!.get(%S) as %T"
 private const val argumentsNullableFormat = "val %N = it.arguments?.get(%S) as? %T"
@@ -83,7 +85,7 @@ internal class RouteGraphProcessor(
         generatedFunctionSymbols.forEach { generatedFunction ->
             generateRoute(symbols.toList(), generatedFunction)
         }
-        return symbols.toList()
+        return (symbols + generatedFunctionSymbols).filter { !it.validate() }.toList()
     }
 
     private fun generateRoute(data: List<KSFunctionDeclaration>, generatedFunction: KSFunctionDeclaration) {
@@ -93,7 +95,7 @@ internal class RouteGraphProcessor(
         )
 
         val navControllerName = generatedFunction.parameters.find {
-            it.type.toTypeName() == navControllerType
+            it.type.toTypeName() == commonNavControllerType
         }?.name?.getShortName()
         requireNotNull(navControllerName) { "not find navController in parameters" }
 
@@ -107,9 +109,10 @@ internal class RouteGraphProcessor(
                     FunSpec.builder(generatedFunction.simpleName.getShortName())
                         .addModifiers(KModifier.ACTUAL)
                         .receiver(requireNotNull(generatedFunction.extensionReceiver?.toTypeName()))
-                        .addParameter(
-                            navControllerName,
-                            navControllerType,
+                        .addParameters(
+                            generatedFunction.parameters.map {
+                                ParameterSpec(it.name?.getShortName().orEmpty(), it.type.toTypeName())
+                            }
                         )
                         .also { builder ->
                             data.forEach { ksFunctionDeclaration ->
