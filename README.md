@@ -4,8 +4,6 @@
 
 `Navigation`绑定一个路由比较麻烦，随着界面的增多后会变得比较难维护，所以我们就尝试把这部分硬编码改成动态生成的方式。
 
-demo地址：https://github.com/qdsfdhvh/kroute
-
 ## 内容
 
 ### 1.绑定路由
